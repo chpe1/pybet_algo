@@ -1,9 +1,8 @@
-import requests
 import time
 import schedule
 from nba_api.stats.endpoints import playerdashboardbygeneralsplits, commonallplayers, teamdashboardbygeneralsplits
-from nba_api.stats.static import teams, players
 import datetime
+
 
 def get_current_season():
     now = datetime.datetime.now()
@@ -11,6 +10,7 @@ def get_current_season():
         return f"{now.year}-{now.year + 1 - 2000}"
     else:
         return f"{now.year - 1}-{now.year - 2000}"
+
 
 def get_teams():
     """
@@ -53,13 +53,14 @@ def get_team_stats(team_id):
 
     return team_stats_list
 
+
 def get_players(team_id):
 
     # Récupération de tous les joueurs actifs dans la ligue
     all_players = commonallplayers.CommonAllPlayers(
         is_only_current_season=True)
 
-    # Filtrer les joueurs qui appartiennent à l'équipe actuelle
+    # Filtre des joueurs qui appartiennent à l'équipe actuelle
     team_players = [player for player in all_players.get_data_frames(
     )[0].to_dict(orient='records') if player['TEAM_ID'] == team_id]
 
@@ -82,7 +83,7 @@ def get_player_stats(player_id):
     player_stats_dict = player_stats.get_normalized_dict()
 
     # Calcul de l'évaluation du joueur
-    if len(player_stats_dict['OverallPlayerDashboard'])>0:
+    if len(player_stats_dict['OverallPlayerDashboard']) > 0:
         evaluation = (
             player_stats_dict['OverallPlayerDashboard'][0]['PTS'] +
             player_stats_dict['OverallPlayerDashboard'][0]['REB'] +
@@ -100,6 +101,8 @@ def get_player_stats(player_id):
         # Ajout des statistiques du joueur à la liste
         player = {
             'PlayerID': player_id,
+            'Matchs joués': player_stats_dict['OverallPlayerDashboard'][0]['GP'],
+            'Minutes jouées': player_stats_dict['OverallPlayerDashboard'][0]['MIN'],
             'Points': player_stats_dict['OverallPlayerDashboard'][0]['PTS'],
             'Rebounds': player_stats_dict['OverallPlayerDashboard'][0]['REB'],
             'Assists': player_stats_dict['OverallPlayerDashboard'][0]['AST'],
@@ -117,6 +120,8 @@ def get_player_stats(player_id):
         # Ajout des statistiques du joueur à la liste
         player = {
             'PlayerID': person_id,
+            'Matchs joués': 0,
+            'Minutes jouées': 0,
             'Points': 0,
             'Rebounds': 0,
             'Assists': 0,
@@ -133,24 +138,24 @@ def get_player_stats(player_id):
 
     return player
 
+
 def main():
-    # Liste des ID qui jouent ce soir
+    # Liste des ID de team qui jouent ce soir
     team_ids = get_teams()
 
     for team_id in team_ids:
         team_stats = get_team_stats(team_id)
         print(f"Team {team_id} Stats: {team_stats}")
 
-        # Supposons que vous ayez une liste d'ID de joueurs pour chaque équipe
-        # Remplacez ces ID par les vrais ID des joueurs
         player_ids = get_players(team_id)
 
-        # Utilisation de list comprehensions pour récupérer les stats de tous les joueurs en une seule requête
-        players_stats = [get_player_stats(player_id) for player_id in player_ids]
+        players_stats = [get_player_stats(player_id)
+                         for player_id in player_ids]
         print(f"Players Stats: {players_stats}")
 
         # Pause pour éviter de surcharger l'API
         time.sleep(1)
+
 
 if __name__ == "__main__":
     main()
