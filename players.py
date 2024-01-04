@@ -24,36 +24,6 @@ def get_teams():
     return teams
 
 
-def get_team_stats(team_id):
-    '''
-    Fonction pour récupérer les statistiques de l'équipe avec l'ID donné
-     '''
-    # Liste pour stocker les statistiques de chaque équipe
-    team_stats_list = []
-
-    team_stats = teamdashboardbygeneralsplits.TeamDashboardByGeneralSplits(
-        team_id=team_id,
-        season=get_current_season(),
-        season_type_all_star='Regular Season',
-        per_mode_detailed='PerGame'
-    )
-
-    # Conversion des résultats en dictionnaire
-    team_stats_dict = team_stats.get_normalized_dict()
-
-    # Ajout des statistiques de l'équipe à la liste
-    team_stats_list.append({
-        'Id Team': team_id,
-        'GamesPlayed': team_stats_dict['OverallTeamDashboard'][0]['GP'],
-        'Points': team_stats_dict['OverallTeamDashboard'][0]['PTS'],
-        'Rebounds': team_stats_dict['OverallTeamDashboard'][0]['REB'],
-        'Assists': team_stats_dict['OverallTeamDashboard'][0]['AST'],
-        'Somme': team_stats_dict['OverallTeamDashboard'][0]['PTS'] + team_stats_dict['OverallTeamDashboard'][0]['REB'] + team_stats_dict['OverallTeamDashboard'][0]['AST']
-    })
-
-    return team_stats_list
-
-
 def get_players(team_id):
 
     # Récupération de tous les joueurs actifs dans la ligue
@@ -100,9 +70,11 @@ def get_player_stats(player_id):
 
         # Ajout des statistiques du joueur à la liste
         player = {
-            'PlayerID': player_id,
-            'Matchs joués': player_stats_dict['OverallPlayerDashboard'][0]['GP'],
-            'Minutes jouées': player_stats_dict['OverallPlayerDashboard'][0]['MIN'],
+            'PlayerID': person_id,
+            'DISPLAY_FIRST_LAST': player_id['DISPLAY_FIRST_LAST'],
+            'TEAM_ID': player_id['TEAM_ID'],
+            'GP': player_stats_dict['OverallPlayerDashboard'][0]['GP'],
+            'MIN': player_stats_dict['OverallPlayerDashboard'][0]['MIN'],
             'Points': player_stats_dict['OverallPlayerDashboard'][0]['PTS'],
             'Rebounds': player_stats_dict['OverallPlayerDashboard'][0]['REB'],
             'Assists': player_stats_dict['OverallPlayerDashboard'][0]['AST'],
@@ -120,8 +92,10 @@ def get_player_stats(player_id):
         # Ajout des statistiques du joueur à la liste
         player = {
             'PlayerID': person_id,
-            'Matchs joués': 0,
-            'Minutes jouées': 0,
+            'DISPLAY_FIRST_LAST': player_id['DISPLAY_FIRST_LAST'],
+            'TEAM_ID': player_id['TEAM_ID'],
+            'GP': 0,
+            'MIN': 0,
             'Points': 0,
             'Rebounds': 0,
             'Assists': 0,
@@ -137,25 +111,3 @@ def get_player_stats(player_id):
         }
 
     return player
-
-
-def main():
-    # Liste des ID de team qui jouent ce soir
-    team_ids = get_teams()
-
-    for team_id in team_ids:
-        team_stats = get_team_stats(team_id)
-        print(f"Team {team_id} Stats: {team_stats}")
-
-        player_ids = get_players(team_id)
-
-        players_stats = [get_player_stats(player_id)
-                         for player_id in player_ids]
-        print(f"Players Stats: {players_stats}")
-
-        # Pause pour éviter de surcharger l'API
-        time.sleep(1)
-
-
-if __name__ == "__main__":
-    main()

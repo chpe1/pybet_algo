@@ -56,10 +56,10 @@ def handicap(liste_teams, four_last_days):
     # Parcourir les équipes ayant un match aujourd'hui
     for equipe_id in liste_teams:
         # Pour débogage, affichage du nom de l'équipe
-        all_teams = teams.get_teams()
-        for team in all_teams:
-            if team['id'] == equipe_id:
-                print(team['full_name'] + '-' + str(equipe_id))
+        # all_teams = teams.get_teams()
+        # for team in all_teams:
+        #     if team['id'] == equipe_id:
+        #         print(team['full_name'] + '-' + str(equipe_id))
         # Fin débogage
         b2b = False
         handicap[equipe_id]=0
@@ -69,10 +69,7 @@ def handicap(liste_teams, four_last_days):
             if equipe_id == match['team_home'] or equipe_id == match['team_visitor']:
                 nombre_matchs += 1
             # L'équipe a-t-elle joué la veille ?
-            if match['team_home'] == equipe_id and match['date'] == date_veille:
-                b2b = True
-            elif match['team_visitor'] == equipe_id and match['date'] == date_veille:
-                b2b = True    
+            b2b = (match['team_home'] == equipe_id or match['team_visitor'] == equipe_id) and match['date'] == date_veille
 
         # Calcul du nombre de points à retirer en fonction de la valeur des différentes variables
         if b2b:

@@ -1,40 +1,35 @@
-import mysql.connector
-from mysql.connector import Error
+import sqlite3
 
 
-def create_connection():
-    connection = None
-    try:
-        connection = mysql.connector.connect(
-            host='localhost',
-            database='nba',
-            user='root',
-            password=''
-        )
-        if connection.is_connected():
-            print(
-                f"Connecté à la base de données MySQL (version {connection.get_server_info()})")
-        return connection
-    except Error as e:
-        print(f"Erreur lors de la connexion à la base de données: {e}")
-        return None
+def query(requete, valeurs=None):
+    connexion = sqlite3.connect("base_de_donnees.db")
+    cursor = connexion.cursor()
+    if valeurs is None:
+        resultats = cursor.execute(requete).fetchall()
+    else:
+        resultats = cursor.execute(requete, valeurs).fetchall()
+    connexion.commit()
+    cursor.close()
+    connexion.close()
+    return resultats
 
 
-def insert_match(cursor, game):
-    try:
-        cursor.execute("""
-            INSERT INTO calendrier (timestamp, id_team_home, id_team_visitor)
-            VALUES (%s, %s, %s)
-        """, (game['timestamp'], game['team_home'], game['team_visitor']))
-    except Error as e:
-        print(f"Erreur lors de l'insertion du match : {e}")
-
-
-def insert_team_id(cursor, id, team):
-    try:
-        cursor.execute("""
-            INSERT INTO teams (id_teams, full_name)
-            VALUES (%s, %s)
-        """, (id, team))
-    except Error as e:
-        print(f"Erreur lors de l'insertion du match : {e}")
+# CREATE TABLE IF NOT EXISTS players (
+#     id INTEGER PRIMARY KEY,
+#     DISPLAY_FIRST_LAST TEXT,
+#     TEAM_ID INTEGER,
+#     GP REAL,
+#     MIN REAL,
+#     Points REAL,
+#     Rebounds REAL,
+#     Assists REAL,
+#     Steals REAL,
+#     Blocks REAL,
+#     FieldGoalsMade REAL,
+#     FieldGoalsAttempted REAL,
+#     ThreePointersMade REAL,
+#     ThreePointersAttempted REAL,
+#     Turnovers REAL,
+#     PersonalFouls REAL,
+#     Evaluation REAL
+# );
